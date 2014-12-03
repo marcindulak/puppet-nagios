@@ -1,0 +1,8 @@
+Plugins are coming from:
+- check_zpool.sh: http://soren.klintrup.dk/zpool
+- check_smb.sh: unknown, another modified version exists at http://planet.pks.mpg.de/trac/site/browser/src/nagios/plugins/check_smb.sh?rev=257
+- check_nfsmount: http://www.reversemidastouch.com/nagios/check_nfsmount, https://raw.github.com/solarkennedy/nagios-plugins/master/check_nfsmount - use the one from github
+- check_flexlm.plx - modified https://www.monitoringexchange.org/attachment/preview/Check-Plugins/Others/check_flexlm/check_flexlm.plx, requires /usr/local/bin/lmutil on nagios server. If lmutil is missing all nagios checks will return OK! Unpack http://www.globes.com/support/fnp_utilities_download.htm under /usr/local/bin and fix insane permissions! chown root.root /usr/local/bin/lmutil; chmod ugo-w /usr/local/bin/lmutil
+- check_svn - http://scripts.mit.edu/trac/export/900/noc/nagios/scripts-plugins/check_svn (version 0.4) and not https://raw.github.com/harisekhon/nagios-plugins/master/legacy/check_svn.py (version 0.6)! requires svn to be installed on the nagios server
+- check_snmp_hp-procurve.sh - http://exchange.nagios.org/directory/Plugins/Hardware/Network-Gear/HP/HP-Procurve-SNMP-monitor/details#/
+- check_cups_queue.sh - https://raw.githubusercontent.com/lusis/old-one-offs/master/check_cups_queue.sh
