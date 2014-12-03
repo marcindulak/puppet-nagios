@@ -3,7 +3,7 @@ Description
 -----------
 
 A puppet module that installs and configures Nagios server and clients.
-Supported on Debian(Ubuntu), RHEL(Fedora) and FreeBSD (only as client).
+Supported on Debian(Ubuntu), RHEL(Fedora) and FreeBSD (FreeBSD only as a client).
 
 Tested on: Debian 7/8, Ubuntu 14.04, RHEL 6/7, Fedora 20, and FreeBSD 10.1.
 
@@ -41,7 +41,7 @@ Configure puppetdb on the puppetmaster server:
   https://docs.puppetlabs.com/puppetdb/latest/configure.html#database-settings
   You should consider using PostresSQL in a production environment.
 
-- perform 3 additional configuration steps::
+- perform additional configuration steps::
 
         cat <<END > /etc/puppet/puppetdb.conf
         [main]
@@ -56,12 +56,16 @@ Configure puppetdb on the puppetmaster server:
         reports = store,puppetdb
         END
 
+  and::
+
+```lang
         cat <<END > /etc/puppet/routes.yaml
-	master:
-	  facts:
-	    terminus: puppetdb
-	    cache: yaml
+        master:
+	       facts:
+	         terminus: puppetdb
+	         cache: yaml
         END
+```
 
 - start (it may take a minute) and enable puppetdb::
 
@@ -101,7 +105,7 @@ the packages from puppetlabs.com, use the distribution packages instead:
   Note: to use NRPE on FreeBSD the Nagios NRPE must be compiled with SSL support (from /usr/ports).
 
 Make sure that the puppet agent configuration file `puppet.conf`
-on all the clients contains the hostname of the puppetmaster server::
+on all the clients contains the hostname of your puppetmaster server::
 
        [agent]
        server = puppetmaster.com
@@ -414,7 +418,7 @@ The settings below should result in the following Nagios configuration:
         }
 
 
-Change permissions so only root can read your credentials::
+Change permissions so only root can read your configuration and credentials (if any)::
 
     # chmod go-rwx /etc/puppet/manifests/site.pp
 
