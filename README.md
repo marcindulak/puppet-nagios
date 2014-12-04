@@ -29,7 +29,7 @@ Install the puppetmaster server machine:
 
 * on Debian/Ubuntu::
 
-        $ sudo apt-get -y install puppet-server puppetdb puppetdb-terminus
+        $ sudo apt-get -y install puppetmaster puppetdb puppetdb-terminus
 
 * on RHEL/Fedora::
 
@@ -69,6 +69,7 @@ Configure puppetdb on the puppetmaster server:
 
 - start (it may take a minute) and enable puppetdb::
 
+        systemctl start puppetmaster.service  # service puppetmaster start
         puppetdb ssl-setup
         systemctl start puppetdb.service  # service puppetdb start
         systemctl enable puppetdb.service  # chkconfig puppetdb on
@@ -92,7 +93,8 @@ the packages from puppetlabs.com, use the distribution packages instead:
 
 * on FreeBSD, as root, switch to pkgng first::
 
-        # pkg
+        # env ASSUME_ALWAYS_YES=YES pkg bootstrap
+        # pkg2ng
 
   then install/configure puppet and the **pkgng** puppet provider::
 
@@ -120,7 +122,10 @@ and accept the certificate on the puppetmaster server::
        puppet cert sign nagiosserver.com
 
 Perform these steps on all your puppet clients.
-
+If you run into MD5/SHA256 certificate issues
+https://tickets.puppetlabs.com/browse/PUP-2992 - clean those certificates
+on the puppetmaster, and use the puppet from the puppetlabs repositories
+on the clients to create new certificates.
 
 1. Install the module and dependencies
 --------------------------------------
@@ -149,13 +154,13 @@ On the puppetmaster server (only) install the puppet-nagios module:
 
 On the puppetmaster server, as root user, create the /etc/puppet/manifests/site.pp file.
 
-The settings below should result in the following Nagios configuration:
+The settings below should result in the following Nagios (RHEL as the server) configuration:
 
 ![Host Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/hostgroups.png)
 ![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
 
 	# nagios server
-	$server_custom = "nagiosserver.com"
+	$server = "nagiosserver.com"
 	# nagios configuration directory must be consistent across exported resources
 	#$sysconfdir = "/etc/nagios3"  # Debian/Ubuntu
 	$sysconfdir = "/etc/nagios"  # RHEL/Fedora
@@ -169,7 +174,7 @@ The settings below should result in the following Nagios configuration:
 	# RHEL6 (32-bit) nagios client
 	node "RHEL6.com" {
 	  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
-	  class { "nagios": server_custom => $server_custom,
+	  class { "nagios": server_custom => $server,
 	    sysconfdir_custom => "$sysconfdir",
 	    user1_custom => "/usr/lib/nagios/plugins",  # PATH to plugins on RHEL 32-bit
 	    nrpe_dont_blame_nrpe_custom => 1,
@@ -190,8 +195,9 @@ The settings below should result in the following Nagios configuration:
 	# RHEL7 nagios client
 	node "RHEL7.com" {
 	  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
-	  class { "nagios": server_custom => $server_custom,
+	  class { "nagios": server_custom => $server,
 	    sysconfdir_custom => "$sysconfdir",
+	    user1_custom => "/usr/lib64/nagios/plugins",  # PATH to plugins on RHEL 64-bit
 	    nrpe_dont_blame_nrpe_custom => 1,
 	    nrpe_incdir_custom => "$nrpe_incdir",
 	  } ->
@@ -233,7 +239,7 @@ The settings below should result in the following Nagios configuration:
 	# Ubuntu nagios client
 	node "Ubuntu14.04.com" {
 	  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
-	  class { "nagios": server_custom => $server_custom,
+	  class { "nagios": server_custom => $server,
 	    sysconfdir_custom => "$sysconfdir",
 	    user1_custom => "/usr/lib/nagios/plugins",  # PATH to plugins on Debian
 	    nrpe_dont_blame_nrpe_custom => 1,
@@ -255,8 +261,9 @@ The settings below should result in the following Nagios configuration:
 	  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 	  # https://github.com/puppetlabs/puppet/blob/master/lib/puppet/provider/package/ports.rb#L9
 	  Package { provider => $operatingsystem ? { freebsd => pkgng, }} # not yet in puppet 3.6.2_2
-	  class { "nagios": server_custom => $server_custom,
+	  class { "nagios": server_custom => $server,
 	    sysconfdir_custom => "$sysconfdir",
+	    user1_custom => "/usr/lib/nagios/plugins",  # PATH to plugins on FreeBSD
 	    nrpe_dont_blame_nrpe_custom => 1,
 	    nrpe_incdir_custom => "$nrpe_incdir",
 	    nrpe_pkg_custom => "net-mgmt/nrpe",
@@ -272,7 +279,7 @@ The settings below should result in the following Nagios configuration:
 	# Nagios server
 	node "nagiosserver.com" {
 	  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
-	  class { "nagios": server_custom => $server_custom,
+	  class { "nagios": server_custom => $server,
 	    sysconfdir_custom => "$sysconfdir",
 	    nrpe_dont_blame_nrpe_custom => 1,
 	    nrpe_incdir_custom => "$nrpe_incdir",
@@ -284,7 +291,7 @@ The settings below should result in the following Nagios configuration:
 	  # no emails if "nagiosadmins" contactgroup is not defined
 	  nagios::contactgroup {"nagiosadmins": contactgroup_name => "nagiosadmins", alias => "Nagios administrators" }
 	  # contacts defined on the nagios server only
-	  nagios::contact {"admin1": contact_name => "admin1", alias => "admin1", contactgroups => "nagiosadmins", email => "admin1@domain.com" }
+	  nagios::contact {"admin1": contact_name => "admin1", alias => "admin1", contactgroups => "nagiosadmins", email => "admin1@com" }
 	  # general hostgroups defined on the nagios server only
 	  nagios::hostgroup {"batch-servers": hostgroup_name => "batch-servers", alias => "Batch servers" }
 	  nagios::hostgroup {"database-servers": hostgroup_name => "database-servers", alias => "Database servers" }
@@ -332,10 +339,13 @@ The settings below should result in the following Nagios configuration:
 	    check_command => "check_dns!2!5",
 	    hostgroup_name => $nagios_hostgroup_all,
 	    servicegroups => "check_dns"}
-	  nagios::command {"check_dns": command_name => "check_dns",
-	    command_line => "${nagios::user1}/check_dns -H \$HOSTADDRESS\$ -w \$ARG1\$ -c \$ARG2\$",
-	    exported_resource => true,
-	  }
+          # Debian/Ubuntu define this command in /etc/nagios-plugins/config/dns.cfg
+          if $::osfamily != 'debian' {
+            nagios::command {"check_dns": command_name => "check_dns",
+	      command_line => "${nagios::user1}/check_dns -H \$HOSTADDRESS\$ -w \$ARG1\$ -c \$ARG2\$",
+              exported_resource => true,
+	    }
+          }
 	  #
 	  nagios::servicegroup {"check_https_cert": servicegroup_name => "check_https_cert",
 	    alias => "check_http!--ssl!30" }
@@ -362,11 +372,14 @@ The settings below should result in the following Nagios configuration:
 	    command_source => "check_smb.sh",
 	  }
 	  #
-	  # check_nrpe_1arg/check_nrpe need to be defined on the server only
-	  nagios::command {"check_nrpe_1arg": command_name => "check_nrpe_1arg",
-	    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -c \$ARG1$" }
-	  nagios::command {"check_nrpe": command_name => "check_nrpe",
-	    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -c \$ARG1$ -a \$ARG2$" }
+          # Debian/Ubuntu define this command in /etc/nagios-plugins/config/check_nrpe.cfg
+          if $::osfamily != 'debian' {
+	    # check_nrpe_1arg/check_nrpe need to be defined on the server only
+	    nagios::command {"check_nrpe_1arg": command_name => "check_nrpe_1arg",
+	      command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -c \$ARG1$" }
+	    nagios::command {"check_nrpe": command_name => "check_nrpe",
+	      command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -c \$ARG1$ -a \$ARG2$" }
+          }
 	  #
 	  # general nrpe checks need to be defined on the server only
 	  nagios::servicegroup {"nrpe_check_load": servicegroup_name => "nrpe_check_load",
@@ -436,16 +449,33 @@ Due to the way the flat configuration files needed by Nagios are
 created on the Nagios server and clients by puppet you may need
 to run puppet agent twice.
 
-In order to access the Nagios web interface, on the Nagios server::
+In order to access the Nagios web interface, on the Nagios server (on RHEL)::
 
         systemctl start httpd.service  # service httpd start
         systemctl enable httpd.service  # chkconfig httpd on
 
-and access `firefox http://localhost/nagios` with the default credentials
-`nagiosadmin`, `nagiosadmin`.
+and access `firefox http://localhost/nagios` (http://localhost/nagios3 on Debian/Ubuntu)
+with the default credentials `nagiosadmin`: `nagiosadmin`.
+On Debian/Ubuntu the Nagios user needs to be created with::
+
+         sudo htpasswd -c /etc/nagios3/htpasswd.users nagiosadmin
 
 In case of problems there is a good troubleshooting guide at
 http://assets.nagios.com/downloads/nagiosxi/docs/NRPE-Troubleshooting-and-Common-Solutions.pdf
+
+Note that Nagios installation on Debian/Ubuntu is missing some
+basic definitions like `generic-host`, `generic-contact`, etc.
+Fix this by manually doing (one time operation)::
+
+        $ sudo mkdir -p /etc/nagios3/objects
+        $ sudo cp -p /usr/share/doc/nagios3-common/examples/template-object/*.cfg /etc/nagios3/objects
+        $ sudo cp -p /usr/share/doc/nagios3-common/examples/template-object/templates.cfg.gz /etc/nagios3/objects
+        $ cd /etc/nagios3/objects
+        $ sudo gunzip templates.cfg.gz
+        $ sudo chown nagios:nagios /etc/nagios3/objects
+
+uncomment the corresponding files in `/etc/nagios3/nagios.cfg`
+and rerun puppet agent on the Nagios server.
 
 The command below is used only for standalone runs
 (without puppetmaster, in case the Nagios server is on the same host as the client)::

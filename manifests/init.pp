@@ -20,7 +20,7 @@ class nagios (
   $nrpe_group_custom = undef,  # e.g. nrpe - needed, e.g by apache
   ) {
     
-    notify { "inside nagios $nagios $::osfamily $::operatingsystem": }
+    #notify { "inside nagios $nagios $::osfamily $::operatingsystem": }
     
     # nagios directory structure name
     $basename = $basename_custom ? {
