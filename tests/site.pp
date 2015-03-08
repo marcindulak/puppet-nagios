@@ -1,5 +1,5 @@
 # nagios server
-$server = "nagiosserver.com"
+$server = "nagiosserver"
 # nagios configuration directory must be consistent across exported resources
 #$sysconfdir = "/etc/nagios3"  # Debian/Ubuntu
 $sysconfdir = "/etc/nagios"  # RHEL/Fedora
@@ -11,7 +11,7 @@ $nrpe_incdir = "/etc/nrpe.d"
 $nagios_hostgroup_all = "batch-servers, database-servers, file-servers, web-servers"
 
 # RHEL6 (32-bit) nagios client
-node "RHEL6.com" {
+node "rhel6" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",
@@ -32,7 +32,7 @@ node "RHEL6.com" {
 }
 
 # RHEL7 nagios client
-node "RHEL7.com" {
+node "rhel7" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",
@@ -76,7 +76,7 @@ node "RHEL7.com" {
 }
 
 # Ubuntu nagios client
-node "Ubuntu14.04.com" {
+node "ubuntu14" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",
@@ -96,7 +96,7 @@ node "Ubuntu14.04.com" {
 }
 
 # FreeBSD nagios client
-node "FreeBSD10.1.com" {
+node "freebsd10" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   # https://github.com/puppetlabs/puppet/blob/master/lib/puppet/provider/package/ports.rb#L9
   Package { provider => $operatingsystem ? { freebsd => pkgng, }} # not yet in puppet 3.6.2_2
@@ -116,7 +116,7 @@ node "FreeBSD10.1.com" {
 }
 
 # Nagios server
-node "nagiosserver.com" {
+node "nagiosserver" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",

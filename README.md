@@ -11,6 +11,28 @@ Tested on: Debian 7/8, Ubuntu 14.04, RHEL 6/7, Fedora 20, and FreeBSD 10.1.
 Sample Usage
 ------------
 
+Assuming you have Vagrant installed from https://www.vagrantup.com/downloads.html
+test the module with::
+
+        $ git clone https://github.com/marcindulak/puppet-nagios.git
+        $ ln -s puppet-nagios/Vagrantfile
+        $ vagrant up
+        $ vagrant ssh nagiosserver -c "sudo su -c 'service httpd start'"
+        $ vagrant ssh nagiosserver -c "sudo su -c 'service iptables stop'"
+        $ firefox http://localhost:8080/nagios  # credentials: nagiosadmin/nagiosadmin
+
+You should see the following Nagios setup:
+
+![Host Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/hostgroups.png)
+![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
+
+When done, destroy the test machines with::
+
+        $ vagrant destroy -f
+
+All the steps performed by [Vagrantfile](Vagrantfile) are described below.
+
+
 0. Install and configure puppet
 -------------------------------
 
@@ -100,9 +122,8 @@ the packages from puppetlabs.com, use the distribution packages instead:
 
         # pkg install -y puppet git
         # cp /usr/local/etc/puppet/puppet.conf-dist /usr/local/etc/puppet/puppet.conf
+        # sed -i '' '/.*isc\.freebsd\.org.*/d' /usr/local/etc/puppet/puppet.conf
         # echo 'puppet_enable="YES"' >> /etc/rc.conf
-        # cd /usr/local/etc/puppet/modules
-        # git clone https://github.com/xaque208/puppet-pkgng.git pkgng
 
   Note: to use NRPE on FreeBSD the Nagios NRPE must be compiled with SSL support (from /usr/ports).
 
@@ -154,10 +175,7 @@ On the puppetmaster server (only) install the puppet-nagios module:
 
 On the puppetmaster server, as root user, create the /etc/puppet/manifests/site.pp file.
 
-The [example site.pp](tests/init.pp) settings should result in the following Nagios setup.
-
-![Host Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/hostgroups.png)
-![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
+Use the [example site.pp](tests/site.pp) file.
 
 Change permissions so only root can read your configuration and credentials (if any)::
 
@@ -221,8 +239,11 @@ The command below is used only for standalone runs
 Dependencies
 ------------
 
-pkgng provider on FreeBSD.
+pkgng provider on FreeBSD. Install it on puppetmaster as described at
+https://forge.puppetlabs.com/zleslie/pkgng
+
 
 ----
 Todo
 ----
+

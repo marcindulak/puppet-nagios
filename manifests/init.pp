@@ -73,7 +73,7 @@ class nagios (
         'RedHat' => 'nagios',
         'FreeBSD' => 'nagios',
       },
-    default => $default,
+    default => $nagios_group_custom,
     }
 
     # apache UNIX group
@@ -83,7 +83,7 @@ class nagios (
         'RedHat' => 'apache',
         'FreeBSD' => 'www',
       },
-    default => $default,
+    default => $apache_group_custom,
     }
     
     # nagios server name or IP
@@ -203,6 +203,7 @@ class nagios::confdir {
     # must be recursive to purge!
     recurse => true, # enable recursive directory management
     # purge seems to remove the contents every time!
+    require => Package["$nagios::server_pkg"],
     notify => Service["$nagios::servicename"],
   }
 }
@@ -210,9 +211,9 @@ class nagios::confdir {
 class nagios::nrpe_incdir {
 
   # Avoid duplicate resources https://groups.google.com/forum/#!topic/puppet-users/uNHIV-Uj4yI
-  #if ! defined(Package[ "$nagios::server_pkg" ]) {
-  #  package { "$nagios::server_pkg": ensure => installed; }
-  #}
+  if ! defined(Package[ "$nagios::nrpe_pkg" ]) {
+    package { "$nagios::nrpe_pkg": ensure => installed; }
+  }
 
   group { "$nagios::nrpe_group":
     ensure => present,
@@ -231,6 +232,7 @@ class nagios::nrpe_incdir {
     # must be recursive to purge!
     recurse => true, # enable recursive directory management
     # purge seems to remove the contents every time!
+    require => Package["$nagios::nrpe_pkg"],
     notify => Service["$nagios::nrpe_servicename"],
   }
 }
@@ -249,6 +251,7 @@ class nagios::htpasswd_file {
     owner => "root",
     group => "$nagios::apache_group",
     mode => 660,
+    require => Package["$nagios::server_pkg"],
     notify => Service["$nagios::servicename"],
   }
 }
@@ -275,12 +278,14 @@ class nagios::server {
     # From https://raw.github.com/thias/puppet-nagios/master/manifests/server.pp
     start => "find $nagios::confdir -type f -name '*.cfg' | xargs -r -I f sh -c 'chgrp $nagios::nagios_group f; chmod g+r f'&& service $nagios::servicename start",
     restart => "find $nagios::confdir -type f -name '*.cfg' | xargs -r -I f sh -c 'chgrp $nagios::nagios_group f; chmod g+r f'&& service $nagios::servicename restart",
+    require => Package["$nagios::server_pkg"],
   }
 
   # cfg_dir not configured on FreeBSD
   exec { "$nagios::sysconfdir/nagios.cfg_confdir":
     command => "echo 'cfg_dir=$nagios::confdir' >> $nagios::sysconfdir/nagios.cfg",
     unless => "grep -E '^cfg_dir=$nagios::confdir' $nagios::sysconfdir/nagios.cfg",
+    require => Package["$nagios::server_pkg"],
     notify => Service["$nagios::servicename"],
   }
 
@@ -339,16 +344,19 @@ class nagios::client {
   exec { "$nagios::nrpe_sysconfdir/nrpe.cfg_allowed_hosts":
     command => "sed -i -e 's|^allowed_hosts=.*|allowed_hosts=127.0.0.1,$nagios::server|g' $nagios::nrpe_sysconfdir/nrpe.cfg",
     onlyif => "grep -E '^allowed_hosts=.*' $nagios::nrpe_sysconfdir/nrpe.cfg",
+    require => Package["$nagios::nrpe_pkg"],
     notify => Service["$nagios::nrpe_servicename"],
   }
   exec { "$nagios::nrpe_sysconfdir/nrpe.cfg_nrpe_dont_blame_nrpe":
     command => "sed -i -e 's|^dont_blame_nrpe=.*|dont_blame_nrpe=$nagios::nrpe_dont_blame_nrpe|g' $nagios::nrpe_sysconfdir/nrpe.cfg",
     onlyif => "grep -E '^dont_blame_nrpe=.*' $nagios::nrpe_sysconfdir/nrpe.cfg",
+    require => Package["$nagios::nrpe_pkg"],
     notify => Service["$nagios::nrpe_servicename"],
   }
   exec { "$nagios::nrpe_sysconfdir/nrpe.cfg_incdir":
     command => "sed -i -e 's|^#include_dir=<somedirectory>|include_dir=$nagios::nrpe_incdir|g' $nagios::nrpe_sysconfdir/nrpe.cfg",
     onlyif => "grep -E '^#include_dir=<somedirectory>' $nagios::nrpe_sysconfdir/nrpe.cfg",
+    require => Package["$nagios::nrpe_pkg"],
     notify => Service["$nagios::nrpe_servicename"],
   }
 
@@ -357,6 +365,7 @@ class nagios::client {
     enable => true,
     start => "find $nagios::nrpe_incdir 2>/dev/null&& find $nagios::nrpe_incdir -type f -name '*.cfg' | xargs -r -I f sh -c 'chgrp $nagios::nrpe_group f; chmod g+r f'&& service $nagios::nrpe_servicename start",
     restart => "find $nagios::nrpe_incdir 2>/dev/null&& find $nagios::nrpe_incdir -type f -name '*.cfg' | xargs -r -I f sh -c 'chgrp $nagios::nrpe_group f; chmod g+r f'&& service $nagios::nrpe_servicename restart",
+    require => Package["$nagios::nrpe_pkg"],
   }
 }
 
@@ -506,6 +515,7 @@ define nagios::command (
           group => "$nagios::nagios_group",
           mode => 550,
           source => "puppet:///modules/nagios/$command_source",
+          require => Package["$nagios::server_pkg"],
           notify => Service["$nagios::servicename"],
         }
       }
@@ -518,6 +528,7 @@ define nagios::command (
         group => "$nagios::nrpe_group",
         mode => 660,
         content => "command[$command_name]=$command_line",
+        require => Package["$nagios::nrpe_pkg"],
         notify => Service["$nagios::nrpe_servicename"],
       }
       if $command_source {
@@ -527,6 +538,7 @@ define nagios::command (
           group => "$nagios::nrpe_group",
           mode => 550,
           source => "puppet:///modules/nagios/$command_source",
+          require => Package["$nagios::nrpe_pkg"],
           notify => Service["$nagios::nrpe_servicename"],
         }
       }
@@ -541,7 +553,7 @@ class nagios::host (
   ) {
 
     # Virtual definition that will become real on the server
-    notify { "inside nagios host class": }
+    #notify { "inside nagios host class": }
     @@nagios_host { "$fqdn":
       ensure => present,
       alias => $hostname,
