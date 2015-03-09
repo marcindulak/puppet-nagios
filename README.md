@@ -15,7 +15,7 @@ Assuming you have Vagrant installed from https://www.vagrantup.com/downloads.htm
 test the module with::
 
         $ git clone https://github.com/marcindulak/puppet-nagios.git
-        $ ln -s puppet-nagios/Vagrantfile
+        $ cd puppet-nagios
         $ vagrant up
         $ vagrant ssh nagiosserver -c "sudo su -c 'service httpd start'"
         $ vagrant ssh nagiosserver -c "sudo su -c 'service iptables stop'"
