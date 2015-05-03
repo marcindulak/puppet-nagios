@@ -22,7 +22,7 @@ node "rhel6" {
   class { "nagios::nrpe_incdir": } ->  # needed only on the client
   class { "nagios::client": } ->
   # Define hostgroups this host belongs to
-  class { "nagios::host": hostgroups => "web-servers" }
+  class { "nagios::host": hostgroups => "web-servers", interface => "eth1" }
   # NRPE commands need to be defined on the nagios client!
   # https://bugs.launchpad.net/ubuntu/+source/nagios-plugins/+bug/615848
   nagios::command {"check_disk": command_name => "check_disk",
@@ -43,7 +43,7 @@ node "rhel7" {
   class { "nagios::nrpe_incdir": } ->  # needed only on the client
   class { "nagios::client": } ->
   # Define hostgroups this host belongs to
-  class { "nagios::host": hostgroups => "database-servers, file-servers, web-servers" }
+  class { "nagios::host": hostgroups => "database-servers, file-servers, web-servers", interface => "enp0s8" }
   # NRPE commands need to be defined on the nagios client!
   nagios::command {"check_disk": command_name => "check_disk",
     command_line => "${nagios::user1}/check_disk -w \$ARG1\$ -c \$ARG2\$ -p \$ARG3\$ -X devtmpfs -X tmpfs -A -i /sys/fs/pstore -i /sys/kernel/config",
@@ -87,7 +87,7 @@ node "ubuntu14" {
   class { "nagios::nrpe_incdir": } ->  # needed only on the client
   class { "nagios::client": } ->
   # Define hostgroups this host belongs to
-  class { "nagios::host": hostgroups => "database-servers" }
+  class { "nagios::host": hostgroups => "database-servers", interface => "eth1" }
   # NRPE commands need to be defined on the nagios client!
   nagios::command {"check_disk": command_name => "check_disk",
     command_line => "${nagios::user1}/check_disk -w \$ARG1\$ -c \$ARG2\$ -p \$ARG3\$ -X devtmpfs -X tmpfs -A -i .gvfs",
@@ -112,7 +112,7 @@ node "freebsd10" {
   class { "nagios::nrpe_incdir": } ->  # needed only on the client
   class { "nagios::client": } ->
   # Define hostgroups this host belongs to
-  class { "nagios::host": hostgroups => "batch-servers" }
+  class { "nagios::host": hostgroups => "batch-servers", interface => "em1" }
 }
 
 # Nagios server

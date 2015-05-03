@@ -5,26 +5,49 @@ Description
 A puppet module that installs and configures Nagios server and clients.
 Supported on Debian(Ubuntu), RHEL(Fedora) and FreeBSD (FreeBSD only as a client).
 
-Tested on: Debian 7/8, Ubuntu 14.04, RHEL 6/7, Fedora 20, and FreeBSD 10.1.
+Tested on: Debian 7/8, Ubuntu 14.04, RHEL 6/7, Fedora 20, and FreeBSD 10.
 
 ------------
 Sample Usage
 ------------
 
-Assuming you have Vagrant installed from https://www.vagrantup.com/downloads.html
+Assuming you have VirtualBox and Vagrant installed
+https://www.virtualbox.org/ https://www.vagrantup.com/downloads.html
 test the module with::
 
         $ git clone https://github.com/marcindulak/puppet-nagios.git
         $ cd puppet-nagios
         $ vagrant up
         $ vagrant ssh nagiosserver -c "sudo su -c 'service httpd start'"
-        $ vagrant ssh nagiosserver -c "sudo su -c 'service iptables stop'"
         $ firefox http://localhost:8080/nagios  # credentials: nagiosadmin/nagiosadmin
 
 You should see the following Nagios setup:
 
 ![Host Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/hostgroups.png)
 ![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
+
+Test Nagios **check_http** plugin on the **nagiosserver**
+command line against the **rhel6** machine::
+
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H rhel6'"
+
+Configure Apache on the **rhel6** machine::
+
+        $ vagrant ssh rhel6 -c "sudo su -c 'yum install -y httpd'"
+        $ vagrant ssh rhel6 -c "sudo su -c 'touch /var/www/html/index.html'"
+        $ vagrant ssh rhel6 -c "sudo su -c 'chown apache.apache /var/www/html/index.html'"
+        $ vagrant ssh rhel6 -c "sudo su -c 'service httpd start'"
+
+Test again::
+
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H rhel6'"
+
+After a short time the service test corresponding to this plugin
+should change status on the Nagios web interface.
+
+Check NRPE **check_total_procs** plugin::
+
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_nrpe -H rhel6 -c check_total_procs -a 150 200'"
 
 When done, destroy the test machines with::
 

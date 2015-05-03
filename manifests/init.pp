@@ -550,6 +550,7 @@ class nagios::host (
   $check_interval = undef,
   $notification_interval = undef,
   $contact_groups = undef,
+  $interface = undef,
   ) {
 
     # Virtual definition that will become real on the server
@@ -557,7 +558,7 @@ class nagios::host (
     @@nagios_host { "$fqdn":
       ensure => present,
       alias => $hostname,
-      address => $ipaddress,
+      address => $interface ? { "eth1" => $ipaddress_eth1, "em1" => $ipaddress_em1, "enp0s8" => $ipaddress_enp0s8, undef => $ipaddress, default => $ipaddress},
       contact_groups => $contact_groups ? { undef => 'admins', default => $contact_groups },
       use => "generic-host",
       max_check_attempts => "5",  # nagios fails to start without it on el6
