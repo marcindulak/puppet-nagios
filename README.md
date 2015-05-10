@@ -3,9 +3,9 @@ Description
 -----------
 
 A puppet module that installs and configures Nagios server and clients.
-Supported on Debian(Ubuntu), RHEL(Fedora) and FreeBSD (FreeBSD only as a client).
+Supported on Debian(Ubuntu), CentOS(Fedora) and FreeBSD (FreeBSD only as a client).
 
-Tested on: Debian 7/8, Ubuntu 14.04, RHEL 6/7, Fedora 20, and FreeBSD 10.
+Tested on: Debian 7/8, Ubuntu 14.04, CentOS 6/7, Fedora 20, and FreeBSD 10.
 
 ------------
 Sample Usage
@@ -27,27 +27,27 @@ You should see the following Nagios setup:
 ![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
 
 Test Nagios **check_http** plugin on the **nagiosserver**
-command line against the **rhel6** machine::
+command line against the **centos6** machine::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H rhel6'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos6'"
 
-Configure Apache on the **rhel6** machine::
+Configure Apache on the **centos6** machine::
 
-        $ vagrant ssh rhel6 -c "sudo su -c 'yum install -y httpd'"
-        $ vagrant ssh rhel6 -c "sudo su -c 'touch /var/www/html/index.html'"
-        $ vagrant ssh rhel6 -c "sudo su -c 'chown apache.apache /var/www/html/index.html'"
-        $ vagrant ssh rhel6 -c "sudo su -c 'service httpd start'"
+        $ vagrant ssh centos6 -c "sudo su -c 'yum install -y httpd'"
+        $ vagrant ssh centos6 -c "sudo su -c 'touch /var/www/html/index.html'"
+        $ vagrant ssh centos6 -c "sudo su -c 'chown apache.apache /var/www/html/index.html'"
+        $ vagrant ssh centos6 -c "sudo su -c 'service httpd start'"
 
 Test again::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H rhel6'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos6'"
 
 After a short time the service test corresponding to this plugin
 should change status on the Nagios web interface.
 
 Check NRPE **check_total_procs** plugin::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_nrpe -H rhel6 -c check_total_procs -a 150 200'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_nrpe -H centos6 -c check_total_procs -a 150 200'"
 
 When done, destroy the test machines with::
 
@@ -65,7 +65,7 @@ This module uses puppetdb, not packaged yet for the targeted
 operating systems (see e.g. https://bugzilla.redhat.com/show_bug.cgi?id=1068867).
 Use the puppet packages provided by puppetlabs.com instead: for Ubuntu/Debian
 install the deb package for your OS version from http://apt.puppetlabs.com/,
-and for Fedora/RHEL install the RPM from http://yum.puppetlabs.com/.
+and for Fedora/CentOS install the RPM from http://yum.puppetlabs.com/.
 
 Note that this module does not handle firewall settings, you are on your own.
 Moreover puppetdb settings are IPv4-centric - disable IPv6 on the puppetmaster!
@@ -76,7 +76,7 @@ Install the puppetmaster server machine:
 
         $ sudo apt-get -y install puppetmaster puppetdb puppetdb-terminus
 
-* on RHEL/Fedora::
+* on CentOS/Fedora::
 
         $ su -c "yum -y install puppet-server puppetdb puppetdb-terminus"
 
@@ -132,7 +132,7 @@ the packages from puppetlabs.com, use the distribution packages instead:
 
         $ sudo apt-get -y install puppet
 
-* on RHEL/Fedora (on RHEL enable the EPEL repository https://fedoraproject.org/wiki/EPEL)::
+* on CentOS/Fedora (on CentOS enable the EPEL repository https://fedoraproject.org/wiki/EPEL)::
 
         $ su -c "yum -y install puppet"
 
@@ -184,7 +184,7 @@ On the puppetmaster server (only) install the puppet-nagios module:
         $ sudo git clone https://github.com/marcindulak/puppet-nagios.git
         $ sudo ln -s puppet-nagios nagios
 
-* on RHEL/Fedora (on RHEL enable the EPEL repository https://fedoraproject.org/wiki/EPEL)::
+* on CentOS/Fedora (on CentOS enable the EPEL repository https://fedoraproject.org/wiki/EPEL)::
 
         $ su -c "yum -y install git"
         $ cd /etc/puppet/modules
@@ -218,7 +218,7 @@ Due to the way the flat configuration files needed by Nagios are
 created on the Nagios server and clients by puppet you may need
 to run puppet agent twice.
 
-In order to access the Nagios web interface, on the Nagios server (on RHEL)::
+In order to access the Nagios web interface, on the Nagios server (on CentOS)::
 
         systemctl start httpd.service  # service httpd start
         systemctl enable httpd.service  # chkconfig httpd on
@@ -253,7 +253,7 @@ The command below is used only for standalone runs
 
         $ sudo puppet apply --verbose --debug /etc/puppet/manifests/site.pp
 
-* on RHEL/Fedora:
+* on CentOS/Fedora:
 
         $ su -c "puppet apply --verbose /etc/puppet/manifests/site.pp"
 

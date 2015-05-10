@@ -2,20 +2,20 @@
 $server = "nagiosserver"
 # nagios configuration directory must be consistent across exported resources
 #$sysconfdir = "/etc/nagios3"  # Debian/Ubuntu
-$sysconfdir = "/etc/nagios"  # RHEL/Fedora
+$sysconfdir = "/etc/nagios"  # CentOS/Fedora
 #$sysconfdir = "/usr/local/etc/nagios"  # FreeBSD
-# RHEL SELinux blocks NRPE in directories other than /etc/nrpe.d
+# CentOS SELinux blocks NRPE in directories other than /etc/nrpe.d
 $nrpe_incdir = "/etc/nrpe.d"
 
 # all hosts groups: group hosts by their purpose
 $nagios_hostgroup_all = "batch-servers, database-servers, file-servers, web-servers"
 
-# RHEL6 (32-bit) nagios client
-node "rhel6" {
+# CentOS6 (32-bit) nagios client
+node "centos6" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",
-    user1_custom => "/usr/lib/nagios/plugins",  # PATH to plugins on RHEL 32-bit
+    user1_custom => "/usr/lib/nagios/plugins",  # PATH to plugins on CentOS 32-bit
     nrpe_dont_blame_nrpe_custom => 1,
     nrpe_incdir_custom => "$nrpe_incdir",
   } ->
@@ -31,12 +31,12 @@ node "rhel6" {
   }
 }
 
-# RHEL7 nagios client
-node "rhel7" {
+# CentOS7 nagios client
+node "centos7" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   class { "nagios": server_custom => $server,
     sysconfdir_custom => "$sysconfdir",
-    user1_custom => "/usr/lib64/nagios/plugins",  # PATH to plugins on RHEL 64-bit
+    user1_custom => "/usr/lib64/nagios/plugins",  # PATH to plugins on CentOS 64-bit
     nrpe_dont_blame_nrpe_custom => 1,
     nrpe_incdir_custom => "$nrpe_incdir",
   } ->

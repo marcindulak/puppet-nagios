@@ -13,22 +13,22 @@ Vagrant.configure(2) do |config|
       v.cpus = 1
     end
   end
-  # rhel6 (32-bit) nagios client
-  config.vm.define "rhel6" do |rhel6|
-    rhel6.vm.box = "puppetlabs/centos-6.6-32-nocm"
-    rhel6.vm.box_url = 'puppetlabs/centos-6.6-32-nocm'
-    rhel6.vm.network "private_network", ip: "192.168.0.10"
-    rhel6.vm.provider "virtualbox" do |v|
+  # centos6 (32-bit) nagios client
+  config.vm.define "centos6" do |centos6|
+    centos6.vm.box = "puppetlabs/centos-6.6-32-nocm"
+    centos6.vm.box_url = 'puppetlabs/centos-6.6-32-nocm'
+    centos6.vm.network "private_network", ip: "192.168.0.10"
+    centos6.vm.provider "virtualbox" do |v|
       v.memory = 128
       v.cpus = 1
     end
   end
-  # rhel7 nagios client
-  config.vm.define "rhel7" do |rhel7|
-    rhel7.vm.box = "puppetlabs/centos-7.0-64-nocm"
-    rhel7.vm.box_url = 'puppetlabs/centos-7.0-64-nocm'
-    rhel7.vm.network "private_network", ip: "192.168.0.20"
-    rhel7.vm.provider "virtualbox" do |v|
+  # centos7 nagios client
+  config.vm.define "centos7" do |centos7|
+    centos7.vm.box = "puppetlabs/centos-7.0-64-nocm"
+    centos7.vm.box_url = 'puppetlabs/centos-7.0-64-nocm'
+    centos7.vm.network "private_network", ip: "192.168.0.20"
+    centos7.vm.provider "virtualbox" do |v|
       v.memory = 128
       v.cpus = 1
     end
@@ -87,8 +87,8 @@ SCRIPT
 cat <<END >> /etc/hosts
 192.168.0.4 puppet
 192.168.0.5 nagiosserver
-192.168.0.10 rhel6
-192.168.0.20 rhel7
+192.168.0.10 centos6
+192.168.0.20 centos7
 192.168.0.30 ubuntu14
 192.168.0.40 freebsd10
 END
@@ -187,23 +187,23 @@ SCRIPT
     puppet.vm.provision :shell, :inline => $service_iptables_stop, run: "always"
     puppet.vm.provision :shell, :inline => $service_puppetmaster_restart, run: "always"
   end
-  config.vm.define "rhel6" do |rhel6|
-    rhel6.vm.provision :shell, :inline => "hostname rhel6", run: "always"
-    rhel6.vm.provision :shell, :inline => $etc_hosts
-    rhel6.vm.provision :shell, :inline => $epel6
-    rhel6.vm.provision :shell, :inline => $rhel_puppet
-    rhel6.vm.provision :shell, :inline => $etc_puppet_puppet_conf
-    rhel6.vm.provision :shell, :inline => $service_iptables_stop, run: "always"
-    rhel6.vm.provision :shell, :inline => $puppet_agent, run: "always"
+  config.vm.define "centos6" do |centos6|
+    centos6.vm.provision :shell, :inline => "hostname centos6", run: "always"
+    centos6.vm.provision :shell, :inline => $etc_hosts
+    centos6.vm.provision :shell, :inline => $epel6
+    centos6.vm.provision :shell, :inline => $rhel_puppet
+    centos6.vm.provision :shell, :inline => $etc_puppet_puppet_conf
+    centos6.vm.provision :shell, :inline => $service_iptables_stop, run: "always"
+    centos6.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
-  config.vm.define "rhel7" do |rhel7|
-    rhel7.vm.provision :shell, :inline => "hostname rhel7", run: "always"
-    rhel7.vm.provision :shell, :inline => $etc_hosts
-    rhel7.vm.provision :shell, :inline => $epel7
-    rhel7.vm.provision :shell, :inline => $rhel_puppet
-    rhel7.vm.provision :shell, :inline => $etc_puppet_puppet_conf
-    rhel7.vm.provision :shell, :inline => $systemctl_stop_firewalld, run: "always"
-    rhel7.vm.provision :shell, :inline => $puppet_agent, run: "always"
+  config.vm.define "centos7" do |centos7|
+    centos7.vm.provision :shell, :inline => "hostname centos7", run: "always"
+    centos7.vm.provision :shell, :inline => $etc_hosts
+    centos7.vm.provision :shell, :inline => $epel7
+    centos7.vm.provision :shell, :inline => $rhel_puppet
+    centos7.vm.provision :shell, :inline => $etc_puppet_puppet_conf
+    centos7.vm.provision :shell, :inline => $systemctl_stop_firewalld, run: "always"
+    centos7.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
   config.vm.define "ubuntu14" do |ubuntu14|
     ubuntu14.vm.provision :shell, :inline => "hostname ubuntu14", run: "always"
