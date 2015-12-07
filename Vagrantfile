@@ -211,6 +211,7 @@ SCRIPT
     ubuntu14.vm.provision :shell, :inline => $debian_puppet
     ubuntu14.vm.provision :shell, :inline => $etc_puppet_puppet_conf
     ubuntu14.vm.provision :shell, :inline => "puppet agent --enable"
+    ubuntu14.vm.provision :shell, :inline => "service puppet stop"
     ubuntu14.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
   config.vm.define "freebsd10" do |freebsd10|
