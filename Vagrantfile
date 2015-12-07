@@ -45,8 +45,8 @@ Vagrant.configure(2) do |config|
   end
   # freebsd nagios client
   config.vm.define "freebsd10" do |freebsd10|
-    freebsd10.vm.box = "chef/freebsd-10.0"
-    freebsd10.vm.box_url = 'chef/freebsd-10.0'
+    freebsd10.vm.box = "bento/freebsd-10.2"
+    freebsd10.vm.box_url = 'bento/freebsd-10.2'
     freebsd10.vm.network "private_network", ip: "192.168.0.40"
     freebsd10.vm.synced_folder ".", "/vagrant", disabled: true
     freebsd10.vm.provider "virtualbox" do |v|
