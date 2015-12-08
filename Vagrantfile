@@ -38,6 +38,7 @@ Vagrant.configure(2) do |config|
     ubuntu14.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
     ubuntu14.vm.box_url = 'puppetlabs/ubuntu-14.04-64-nocm'
     ubuntu14.vm.network "private_network", ip: "192.168.0.30"
+    ubuntu14.vm.synced_folder ".", "/vagrant", disabled: true
     ubuntu14.vm.provider "virtualbox" do |v|
       v.memory = 256  # Ubuntu is greedy
       v.cpus = 1
