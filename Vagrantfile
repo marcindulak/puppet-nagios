@@ -222,9 +222,11 @@ SCRIPT
       s.inline = $etc_rc_conf_hostname
       s.args   = "freebsd10"
     end
-    freebsd10.vm.provision :shell, :inline => $freebsd_puppet
-    freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
-    freebsd10.vm.provision :shell, :inline => $puppet_agent, run: "always"
+    # disabled: installation of puppet hangs at: Fetching ruby-2.1.7,1.txz
+    #freebsd10.vm.provision :shell, :inline => $freebsd_puppet
+    #freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
+    # 
+    #freebsd10.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
   # last provision nagiosserver - needs to know all exported nagios clients resources
   config.vm.define "nagiosserver" do |nagiosserver|

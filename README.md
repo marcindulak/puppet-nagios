@@ -7,6 +7,8 @@ Supported on Debian(Ubuntu), CentOS(Fedora) and FreeBSD (FreeBSD only as a clien
 
 Tested on: Debian 7/8, Ubuntu 14.04, CentOS 6/7, Fedora 20, and FreeBSD 10.
 
+**Note**: FreeBSD installation is currently broken.
+
 ------------
 Sample Usage
 ------------
@@ -270,3 +272,8 @@ https://forge.puppetlabs.com/zleslie/pkgng
 Todo
 ----
 
+--------
+Problems
+--------
+
+1. installation of Puppet on FreeBSD 10.2 (after box has been moved chef->bento) hangs.
