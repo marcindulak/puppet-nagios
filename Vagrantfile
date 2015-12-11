@@ -51,7 +51,7 @@ Vagrant.configure(2) do |config|
     freebsd10.vm.network "private_network", ip: "192.168.0.40"
     freebsd10.vm.synced_folder ".", "/vagrant", disabled: true
     freebsd10.vm.provider "virtualbox" do |v|
-      v.memory = 256  # FreeBSD is greedy
+      v.memory = 512  # FreeBSD is greedy
       v.cpus = 1
     end
   end
@@ -222,11 +222,9 @@ SCRIPT
       s.inline = $etc_rc_conf_hostname
       s.args   = "freebsd10"
     end
-    # disabled: installation of puppet hangs at: Fetching ruby-2.1.7,1.txz
-    #freebsd10.vm.provision :shell, :inline => $freebsd_puppet
-    #freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
-    # 
-    #freebsd10.vm.provision :shell, :inline => $puppet_agent, run: "always"
+    freebsd10.vm.provision :shell, :inline => $freebsd_puppet
+    freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
+    freebsd10.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
   # last provision nagiosserver - needs to know all exported nagios clients resources
   config.vm.define "nagiosserver" do |nagiosserver|
