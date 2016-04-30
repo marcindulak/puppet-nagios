@@ -128,7 +128,7 @@ SCRIPT
   $freebsd_puppet = <<SCRIPT
 env ASSUME_ALWAYS_YES=YES pkg bootstrap
 pkg2ng
-pkg install -y puppet
+pkg install -y puppet38
 cp -p /usr/local/etc/puppet/puppet.conf-dist /usr/local/etc/puppet/puppet.conf
 echo 'puppet_enable="YES"' >> /etc/rc.conf
 SCRIPT
