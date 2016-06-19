@@ -220,7 +220,7 @@ SCRIPT
     freebsd10.vm.provision :shell, :inline => $etc_hosts
     freebsd10.vm.provision "shell" do |s|
       s.inline = $etc_rc_conf_hostname
-      s.args   = "freebsd10"
+      s.args   = ["freebsd10"]
     end
     freebsd10.vm.provision :shell, :inline => $freebsd_puppet
     freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
