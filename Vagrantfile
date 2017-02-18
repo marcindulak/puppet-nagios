@@ -45,20 +45,20 @@ Vagrant.configure(2) do |config|
     end
   end
   # freebsd nagios client
-  config.vm.define "freebsd10" do |freebsd10|
-    freebsd10.vm.box = "bento/freebsd-10.2"
-    freebsd10.vm.box_url = 'bento/freebsd-10.2'
-    freebsd10.vm.network "private_network", ip: "192.168.0.40"
-    freebsd10.vm.synced_folder ".", "/vagrant", disabled: true
-    freebsd10.vm.provider "virtualbox" do |v|
+  config.vm.define "freebsd11" do |freebsd11|
+    freebsd11.vm.box = "bento/freebsd-11.0"
+    freebsd11.vm.box_url = 'bento/freebsd-11.0'
+    freebsd11.vm.network "private_network", ip: "192.168.0.40"
+    freebsd11.vm.synced_folder ".", "/vagrant", disabled: true
+    freebsd11.vm.provider "virtualbox" do |v|
       v.memory = 512  # FreeBSD is greedy
       v.cpus = 1
     end
   end
   # nagiosserver
   config.vm.define "nagiosserver" do |nagiosserver|
-    nagiosserver.vm.box = "puppetlabs/centos-6.6-64-nocm"
-    nagiosserver.vm.box_url = 'puppetlabs/centos-6.6-64-nocm'
+    nagiosserver.vm.box = "puppetlabs/centos-7.2-64-nocm"
+    nagiosserver.vm.box_url = 'puppetlabs/centos-7.2-64-nocm'
     nagiosserver.vm.network "private_network", ip: "192.168.0.5"
     nagiosserver.vm.network "forwarded_port", guest: 80, host: 8080
     nagiosserver.vm.provider "virtualbox" do |v|
@@ -91,7 +91,7 @@ cat <<END >> /etc/hosts
 192.168.0.10 centos6
 192.168.0.20 centos7
 192.168.0.30 ubuntu14
-192.168.0.40 freebsd10
+192.168.0.40 freebsd11
 END
 SCRIPT
   # set puppet on clients
@@ -138,6 +138,10 @@ SCRIPT
   # puppetlabs on rhel6
   $puppetlabs_el6 = <<SCRIPT
 yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
+SCRIPT
+  # puppetlabs on rhel7
+  $puppetlabs_el7 = <<SCRIPT
+yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
 SCRIPT
   # run puppet agent
   $puppet_agent = <<SCRIPT
@@ -192,6 +196,7 @@ SCRIPT
     centos6.vm.provision :shell, :inline => "hostname centos6", run: "always"
     centos6.vm.provision :shell, :inline => $etc_hosts
     centos6.vm.provision :shell, :inline => $epel6
+    centos6.vm.provision :shell, :inline => $puppetlabs_el6
     centos6.vm.provision :shell, :inline => $rhel_puppet
     centos6.vm.provision :shell, :inline => $etc_puppet_puppet_conf
     centos6.vm.provision :shell, :inline => $service_iptables_stop, run: "always"
@@ -201,6 +206,7 @@ SCRIPT
     centos7.vm.provision :shell, :inline => "hostname centos7", run: "always"
     centos7.vm.provision :shell, :inline => $etc_hosts
     centos7.vm.provision :shell, :inline => $epel7
+    centos7.vm.provision :shell, :inline => $puppetlabs_el7
     centos7.vm.provision :shell, :inline => $rhel_puppet
     centos7.vm.provision :shell, :inline => $etc_puppet_puppet_conf
     centos7.vm.provision :shell, :inline => $systemctl_stop_firewalld, run: "always"
@@ -215,25 +221,28 @@ SCRIPT
     # puppet agent --enable starts the agent
     #ubuntu14.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
-  config.vm.define "freebsd10" do |freebsd10|
-    freebsd10.vm.provision :shell, :inline => "hostname freebsd10", run: "always"
-    freebsd10.vm.provision :shell, :inline => $etc_hosts
-    freebsd10.vm.provision "shell" do |s|
+  config.vm.define "freebsd11" do |freebsd11|
+    freebsd11.vm.provision :shell, :inline => "hostname freebsd11", run: "always"
+    freebsd11.vm.provision :shell, :inline => $etc_hosts
+    freebsd11.vm.provision "shell" do |s|
       s.inline = $etc_rc_conf_hostname
-      s.args   = ["freebsd10"]
+      s.args   = ["freebsd11"]
     end
-    freebsd10.vm.provision :shell, :inline => $freebsd_puppet
-    freebsd10.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
-    freebsd10.vm.provision :shell, :inline => $puppet_agent, run: "always"
+    freebsd11.vm.provision :shell, :inline => $freebsd_puppet
+    freebsd11.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
+    freebsd11.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
   # last provision nagiosserver - needs to know all exported nagios clients resources
   config.vm.define "nagiosserver" do |nagiosserver|
     nagiosserver.vm.provision :shell, :inline => "hostname nagiosserver", run: "always"
     nagiosserver.vm.provision :shell, :inline => $etc_hosts
-    nagiosserver.vm.provision :shell, :inline => $epel6
+    nagiosserver.vm.provision :shell, :inline => $epel7
+    nagiosserver.vm.provision :shell, :inline => $puppetlabs_el7
     nagiosserver.vm.provision :shell, :inline => $rhel_puppet
     nagiosserver.vm.provision :shell, :inline => $etc_puppet_puppet_conf
-    nagiosserver.vm.provision :shell, :inline => $service_iptables_stop, run: "always"
+    nagiosserver.vm.provision :shell, :inline => $systemctl_stop_firewalld, run: "always"
+    # restarting network fixes RTNETLINK answers: File exists
+    nagiosserver.vm.provision :shell, :inline => 'systemctl restart network'
     nagiosserver.vm.provision :shell, :inline => $puppet_agent, run: "always"
   end
 end

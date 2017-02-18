@@ -96,7 +96,7 @@ node "ubuntu14" {
 }
 
 # FreeBSD nagios client
-node "freebsd10" {
+node "freebsd11" {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
   # https://github.com/puppetlabs/puppet/blob/master/lib/puppet/provider/package/ports.rb#L9
   Package { provider => $operatingsystem ? { freebsd => pkgng, }} # not yet in puppet 3.6.2_2

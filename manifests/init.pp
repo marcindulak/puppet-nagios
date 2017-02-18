@@ -341,6 +341,12 @@ class nagios::client {
       package { "$nagios::plugins_pkg": ensure => installed; }
   }
 
+  exec { "$nagios::nrpe_sysconfdir/nrpe.cfg_allowed_hosts_hash":
+    command => "sed -i -e 's|#allowed_hosts=.*|allowed_hosts=127.0.0.1,$nagios::server|g' $nagios::nrpe_sysconfdir/nrpe.cfg",
+    onlyif => "grep -E '#allowed_hosts=.*' $nagios::nrpe_sysconfdir/nrpe.cfg",
+    require => Package["$nagios::nrpe_pkg"],
+    notify => Service["$nagios::nrpe_servicename"],
+  }
   exec { "$nagios::nrpe_sysconfdir/nrpe.cfg_allowed_hosts":
     command => "sed -i -e 's|^allowed_hosts=.*|allowed_hosts=127.0.0.1,$nagios::server|g' $nagios::nrpe_sysconfdir/nrpe.cfg",
     onlyif => "grep -E '^allowed_hosts=.*' $nagios::nrpe_sysconfdir/nrpe.cfg",

@@ -5,7 +5,7 @@ Description
 A puppet module that installs and configures Nagios server and clients.
 Supported on Debian(Ubuntu), CentOS(Fedora) and FreeBSD (FreeBSD only as a client).
 
-Tested on: Debian 7/8, Ubuntu 14.04, CentOS 6/7, Fedora 20, and FreeBSD 10.
+Tested on: Debian 7/8, Ubuntu 14.04, CentOS 6/7, Fedora 20, and FreeBSD 11.
 
 
 ------------
@@ -28,27 +28,27 @@ You should see the following Nagios setup:
 ![Service Groups](https://raw.github.com/marcindulak/puppet-nagios/master/screenshots/servicegroups.png)
 
 Test Nagios **check_http** plugin on the **nagiosserver**
-command line against the **centos6** machine::
+command line against the **centos7** machine::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos6'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos7'"
 
-Configure Apache on the **centos6** machine::
+Configure Apache on the **centos7** machine::
 
-        $ vagrant ssh centos6 -c "sudo su -c 'yum install -y httpd'"
-        $ vagrant ssh centos6 -c "sudo su -c 'touch /var/www/html/index.html'"
-        $ vagrant ssh centos6 -c "sudo su -c 'chown apache.apache /var/www/html/index.html'"
-        $ vagrant ssh centos6 -c "sudo su -c 'service httpd start'"
+        $ vagrant ssh centos7 -c "sudo su -c 'yum install -y httpd'"
+        $ vagrant ssh centos7 -c "sudo su -c 'touch /var/www/html/index.html'"
+        $ vagrant ssh centos7 -c "sudo su -c 'chown apache.apache /var/www/html/index.html'"
+        $ vagrant ssh centos7 -c "sudo su -c 'service httpd start'"
 
 Test again::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos6'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_http -H centos7'"
 
 After a short time the service test corresponding to this plugin
 should change status on the Nagios web interface.
 
 Check NRPE **check_total_procs** plugin::
 
-        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_nrpe -H centos6 -c check_total_procs -a 150 200'"
+        $ vagrant ssh nagiosserver -c "sudo su -c '/usr/lib64/nagios/plugins/check_nrpe -H centos7 -c check_total_procs -a 150 200'"
 
 When done, destroy the test machines with::
 
@@ -133,7 +133,7 @@ the packages from puppetlabs.com, use the distribution packages instead:
 
         $ sudo apt-get -y install puppet
 
-* on CentOS/Fedora (on CentOS enable the EPEL repository https://fedoraproject.org/wiki/EPEL)::
+* on CentOS/Fedora (on CentOS7 enable the EPEL repository https://fedoraproject.org/wiki/EPEL, on CentOS6 the Puppetlabs repository https://docs.puppet.com/puppet/3.8/puppet_repositories.html#yum-based-systems)::
 
         $ su -c "yum -y install puppet"
 
