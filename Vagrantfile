@@ -228,9 +228,12 @@ SCRIPT
       s.inline = $etc_rc_conf_hostname
       s.args   = ["freebsd11"]
     end
-    freebsd11.vm.provision :shell, :inline => $freebsd_puppet
-    freebsd11.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
-    freebsd11.vm.provision :shell, :inline => $puppet_agent, run: "always"
+    # freebsd is removing older versions of puppet, and puppet is changing lots of things with each major version
+    if false
+      freebsd11.vm.provision :shell, :inline => $freebsd_puppet
+      freebsd11.vm.provision :shell, :inline => $usr_local_etc_puppet_puppet_conf
+      freebsd11.vm.provision :shell, :inline => $puppet_agent, run: "always"
+    end
   end
   # last provision nagiosserver - needs to know all exported nagios clients resources
   config.vm.define "nagiosserver" do |nagiosserver|

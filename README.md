@@ -7,6 +7,8 @@ Supported on Debian(Ubuntu), CentOS(Fedora) and FreeBSD (FreeBSD only as a clien
 
 Tested on: Debian 7/8, Ubuntu 14.04, CentOS 6/7, Fedora 20, and FreeBSD 11.
 
+Note: this project is abandoned. It may still work with Puppet 3.
+
 
 ------------
 Sample Usage
