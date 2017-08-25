@@ -113,13 +113,13 @@ END
 SCRIPT
   # provision puppet clients
   $epel6 = <<SCRIPT
-yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 SCRIPT
   $rhel_puppet = <<SCRIPT
 yum -y install puppet
 SCRIPT
   $epel7 = <<SCRIPT
-yum -y install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 SCRIPT
   $debian_puppet = <<SCRIPT
 apt-get update
